@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Center</title>
+
+    <script src="js/jquery-3.2.1.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+
+    <script src="LoadingAnimation/LoadingAnimation.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+
+    <!-- Aditional styles, not important -->
+    <style>
+        .LoadingAnimation {
+            margin: 5px auto;
+        }
+    </style>
+    <!-- End of: Aditional styles -->
+</head>
+
+<body>
+    <div class="container">
+
+
+
+
+        <!-- Example 1 -->
+        <div class="row">
+            <div class="col-xs-12">
+                <h1>Example 1</h1>
+                <h3>By the selector</h3>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-12" id="example_1">
+
+            </div>
+        </div>
+        <script>
+            var example_1 = new LoadingAnimation("#example_1");
+            example_1.init();
+
+            example_1.start();
+
+            //example_1.remove();
+        </script>
+        <!-- End of: Example 1 -->
+
+
+
+
+
+
+
+
+    </div>
+</body>
+
+</html>
