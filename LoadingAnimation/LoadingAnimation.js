@@ -11,12 +11,12 @@ class LoadingAnimation {
 
         ////////////////////////////////////
         // Identyficate and check element 
-        this.elements = $(element);
-        if (this.elements.length < 1) {
+        this.element = $(element);
+        if (this.element.length < 1) {
             console.error("[LoadingAnimation] Error: No elements to add loading animation to.");
             return;
         }
-        if (this.elements.length > 1) {
+        if (this.element.length > 1) {
             console.error("[LoadingAnimation] Error: Too much elements (" + this.elements.length + ") to add loading animation to.");
             return;
         }
@@ -34,7 +34,8 @@ class LoadingAnimation {
 
         this.STAGES = {
             FIRST_SQUARE: 0,
-            SECOND_SQUARE: 1
+            SECOND_SQUARE: 1,
+            THIRD_SQUARE: 2
         }
         this.timer = {
             counter: 0,
@@ -42,17 +43,23 @@ class LoadingAnimation {
         };
         this.SQUARES = [
             [
-                [-0.5, 0.0],
-                [0.0, 0.5],
-                [0.5, 0.0],
-                [0.0, -0.5]
+                [-0.48, 0.0],
+                [0.0, 0.48],
+                [0.48, 0.0],
+                [0.0, -0.48]
             ],
             [
-                [-0.25, 0.25],
-                [0.25, 0.25],
-                [0.25, -0.25],
-                [-0.25, -0.25]
-            ]
+                [-0.248, 0.248],
+                [0.248, 0.248],
+                [0.248, -0.248],
+                [-0.248, -0.248]
+            ],
+            [
+                [-0.25, 0.0],
+                [0.0, 0.25],
+                [0.25, 0.0],
+                [0.0, -0.25]
+            ],
         ];
     }
 
@@ -68,25 +75,36 @@ class LoadingAnimation {
         this.ctx = this.handle[0].getContext("2d");
 
         if (this.mode === "prepend") {
-            this.elements.prepend(this.handle);
+            this.element.prepend(this.handle);
         } else {
-            this.elements.append(this.handle);
+            this.element.append(this.handle);
         }
 
         this.resize();
-        $(window).resize(this.resize);
+        $(window).resize(() => this.resize());
 
         this.is_initialized = true;
     }
 
 
     resize() {
-        // Dunno what here
-        //console.log("a");
+        var w = this.element.width();
+        var h = this.element.height();
+        var smalest = (w < h) ? w : h;
+        if (smalest < this.size) {
+            this.size = smalest;
+            this.handle.attr("width", smalest + "px");
+            this.handle.attr("height", smalest + "px");
+            this.ctx.transform(1, 0, 0, 1, this.size / 2, this.size / 2);
+        }
     }
 
 
     start() {
+        if (this.play_animation === true) {
+            return;
+        }
+
         this.timer.counter = 0;
         this.timer.stage = this.STAGES.FIRST_SQUARE;
 
@@ -95,8 +113,6 @@ class LoadingAnimation {
 
         this.ctx.save();
         this.ctx.transform(1, 0, 0, 1, this.size / 2, this.size / 2);
-        this.ctx.fillStyle = "black";
-        this.ctx.lineWidth = 1;
 
         this.loop();
     }
@@ -107,28 +123,45 @@ class LoadingAnimation {
             return;
         }
 
-        this.timer.counter++;
+        this.timer.counter += 3;
 
         this.ctx.save();
         this.ctx.clearRect(-this.size, -this.size, 2 * this.size, 2 * this.size);
 
         this.ctx.beginPath();
 
+        var draw_square = (which) => {
+            this.ctx.moveTo(this.SQUARES[which][0][0] * this.size, this.SQUARES[which][0][1] * this.size);
+            for (var i = 1; i < this.SQUARES[0].length; i++) {
+                this.ctx.lineTo(this.SQUARES[which][i][0] * this.size, this.SQUARES[which][i][1] * this.size);
+            }
+            this.ctx.lineTo(this.SQUARES[which][0][0] * this.size, this.SQUARES[which][0][1] * this.size);
+            this.ctx.stroke();
+        }
+
+        this.ctx.rotate(27 * Math.PI / 180);
+
         switch (this.timer.stage) {
             case this.STAGES.FIRST_SQUARE:
 
-                this.ctx.moveTo(this.SQUARES[0][0][0] * this.size, this.SQUARES[0][0][1] * this.size);
-                for (var i = 1; i < this.SQUARES[0].length; i++) {
-                    this.ctx.lineTo(this.SQUARES[0][i][0] * this.size, this.SQUARES[0][i][1] * this.size);
-                }
-                this.ctx.lineTo(this.SQUARES[0][0][0] * this.size, this.SQUARES[0][0][1] * this.size);
+                // 1.
+                this.ctx.strokeStyle = "rgba(0,0,0,0.15)";
+                this.ctx.lineWidth = 3;
+                draw_square(0);
+                this.ctx.strokeStyle = "rgba(0,0,0,0.8)";
+                this.ctx.lineWidth = 1;
+                draw_square(0);
 
+
+                // 2.
                 this.ctx.rotate(this.timer.counter * Math.PI / 180);
-                this.ctx.moveTo(this.SQUARES[1][0][0] * this.size, this.SQUARES[1][0][1] * this.size);
-                for (var i = 1; i < this.SQUARES[1].length; i++) {
-                    this.ctx.lineTo(this.SQUARES[1][i][0] * this.size, this.SQUARES[1][i][1] * this.size);
-                }
-                this.ctx.lineTo(this.SQUARES[1][0][0] * this.size, this.SQUARES[1][0][1] * this.size);
+                this.ctx.strokeStyle = "rgba(0,0,0,0.15)";
+                this.ctx.lineWidth = 3;
+                draw_square(1);
+                this.ctx.strokeStyle = "rgba(0,0,0,0.8)";
+                this.ctx.lineWidth = 1;
+                draw_square(1);
+
 
                 if (this.timer.counter > 88) {
                     this.timer.counter = 2;
@@ -140,32 +173,73 @@ class LoadingAnimation {
 
             case this.STAGES.SECOND_SQUARE:
 
+                // 1.
                 this.ctx.rotate(-this.timer.counter * Math.PI / 180);
-                this.ctx.moveTo(this.SQUARES[0][0][0] * this.size, this.SQUARES[0][0][1] * this.size);
-                for (var i = 1; i < this.SQUARES[0].length; i++) {
-                    this.ctx.lineTo(this.SQUARES[0][i][0] * this.size, this.SQUARES[0][i][1] * this.size);
-                }
-                this.ctx.lineTo(this.SQUARES[0][0][0] * this.size, this.SQUARES[0][0][1] * this.size);
+                this.ctx.strokeStyle = "rgba(0,0,0,0.15)";
+                this.ctx.lineWidth = 3;
+                draw_square(0);
+                this.ctx.strokeStyle = "rgba(0,0,0,0.8)";
+                this.ctx.lineWidth = 1;
+                draw_square(0);
 
-                this.ctx.rotate(-this.timer.counter * Math.PI / 180);
-                this.ctx.moveTo(this.SQUARES[1][0][0] * this.size, this.SQUARES[1][0][1] * this.size);
-                for (var i = 1; i < this.SQUARES[1].length; i++) {
-                    this.ctx.lineTo(this.SQUARES[1][i][0] * this.size, this.SQUARES[1][i][1] * this.size);
-                }
-                this.ctx.lineTo(this.SQUARES[1][0][0] * this.size, this.SQUARES[1][0][1] * this.size);
+                // 2.
+                this.ctx.rotate(this.timer.counter * Math.PI / 180);
+                this.ctx.strokeStyle = "rgba(0,0,0,0.15)";
+                this.ctx.lineWidth = 3;
+                draw_square(1);
+                this.ctx.strokeStyle = "rgba(0,0,0,0.8)";
+                this.ctx.lineWidth = 1;
+                draw_square(1);
+
 
                 if (this.timer.counter > 88) {
                     this.timer.counter = 2;
                     this.timer.stage = this.STAGES.FIRST_SQUARE;
                 }
                 break;
-        }
 
-        this.ctx.stroke();
+
+                /*
+                case this.STAGES.THIRD_SQUARE:
+
+                    // 1.
+                    this.ctx.strokeStyle = "rgba(0,0,0,0.2)";
+                    this.ctx.lineWidth = 3;
+                    draw_square(0);
+                    this.ctx.strokeStyle = "rgba(0,0,0,0.8)";
+                    this.ctx.lineWidth = 1;
+                    draw_square(0);
+
+
+                    // 2.
+                    this.ctx.rotate(this.timer.counter * Math.PI / 180);
+                    this.ctx.strokeStyle = "rgba(0,0,0,0.2)";
+                    this.ctx.lineWidth = 3;
+                    draw_square(1);
+                    this.ctx.strokeStyle = "rgba(0,0,0,0.8)";
+                    this.ctx.lineWidth = 1;
+                    draw_square(1);
+
+                    // 3.
+                    this.ctx.strokeStyle = "rgba(0,0,0,0.2)";
+                    this.ctx.lineWidth = 3;
+                    draw_square(2);
+                    this.ctx.strokeStyle = "rgba(0,0,0,0.8)";
+                    this.ctx.lineWidth = 1;
+                    draw_square(2);
+
+
+                    if (this.timer.counter > 88) {
+                        this.timer.counter = 2;
+                        this.timer.stage = this.STAGES.FIRST_SQUARE;
+                    }
+                    break;
+                    */
+        }
 
         this.ctx.restore();
 
-        setTimeout(() => this.loop(), 10);
+        setTimeout(() => this.loop(), 15);
     }
 
 
@@ -179,6 +253,7 @@ class LoadingAnimation {
     remove() {
         this.is_initialized = false;
         $(window).off("resize", this.resize);
+        this.handle.remove();
     }
 
 }
