@@ -23,7 +23,7 @@ class LoadingAnimation {
 
         ////////////////////////////////////
         // Default values of LoadingAnimation
-        this.size = 50;
+        this.size_default = 50
         this.mode = "prepend";
 
         ////////////////////////////////////
@@ -31,11 +31,11 @@ class LoadingAnimation {
         this.is_initialized = false;
         this.handle = null;
         this.ctx = null;
+        this.size = this.size_default;
 
         this.STAGES = {
             FIRST_SQUARE: 0,
-            SECOND_SQUARE: 1,
-            THIRD_SQUARE: 2
+            SECOND_SQUARE: 1
         }
         this.timer = {
             counter: 0,
@@ -53,14 +53,15 @@ class LoadingAnimation {
                 [0.248, 0.248],
                 [0.248, -0.248],
                 [-0.248, -0.248]
-            ],
-            [
-                [-0.25, 0.0],
-                [0.0, 0.25],
-                [0.25, 0.0],
-                [0.0, -0.25]
-            ],
+            ]
         ];
+    }
+
+
+    cubic(x, x1, x2) {
+        var p1 = ((x2 - x) / (x2 - x1) * Math.PI) - (Math.PI / 2.0);
+        var si = -Math.sin(p1) * (x2 - x1) + (x2 - x1);
+        return si / 2;
     }
 
 
@@ -89,14 +90,18 @@ class LoadingAnimation {
 
     resize() {
         var w = this.element.width();
-        var h = this.element.height();
-        var smalest = (w < h) ? w : h;
-        if (smalest < this.size) {
-            this.size = smalest;
-            this.handle.attr("width", smalest + "px");
-            this.handle.attr("height", smalest + "px");
+        if (w < this.size) {
+            this.size = w;
+            this.handle.attr("width", this.size + "px");
+            this.handle.attr("height", this.size + "px");
             this.ctx.transform(1, 0, 0, 1, this.size / 2, this.size / 2);
         }
+        /*else if (w > this.size) {
+                   this.size = this.size_default;
+                   this.handle.attr("width", this.size + "px");
+                   this.handle.attr("height", this.size + "px");
+                   this.ctx.transform(1, 0, 0, 1, this.size / 2, this.size / 2);
+               }*/
     }
 
 
@@ -123,7 +128,7 @@ class LoadingAnimation {
             return;
         }
 
-        this.timer.counter += 3;
+        this.timer.counter += 2.0;
 
         this.ctx.save();
         this.ctx.clearRect(-this.size, -this.size, 2 * this.size, 2 * this.size);
@@ -144,9 +149,11 @@ class LoadingAnimation {
         switch (this.timer.stage) {
             case this.STAGES.FIRST_SQUARE:
 
+                var rotate_by = this.cubic(this.timer.counter, 0, 90) * Math.PI / 180;
+
                 // 1.
-                this.ctx.strokeStyle = "rgba(0,0,0,0.15)";
-                this.ctx.lineWidth = 3;
+                this.ctx.strokeStyle = "rgba(0,0,0,0.2)";
+                this.ctx.lineWidth = 2;
                 draw_square(0);
                 this.ctx.strokeStyle = "rgba(0,0,0,0.8)";
                 this.ctx.lineWidth = 1;
@@ -154,17 +161,17 @@ class LoadingAnimation {
 
 
                 // 2.
-                this.ctx.rotate(this.timer.counter * Math.PI / 180);
-                this.ctx.strokeStyle = "rgba(0,0,0,0.15)";
-                this.ctx.lineWidth = 3;
+                this.ctx.rotate(rotate_by);
+                this.ctx.strokeStyle = "rgba(0,0,0,0.2)";
+                this.ctx.lineWidth = 2;
                 draw_square(1);
                 this.ctx.strokeStyle = "rgba(0,0,0,0.8)";
                 this.ctx.lineWidth = 1;
                 draw_square(1);
 
 
-                if (this.timer.counter > 88) {
-                    this.timer.counter = 2;
+                if (this.timer.counter > 90) {
+                    this.timer.counter = 0;
                     this.timer.stage = this.STAGES.SECOND_SQUARE;
                 }
                 break;
@@ -173,68 +180,33 @@ class LoadingAnimation {
 
             case this.STAGES.SECOND_SQUARE:
 
+                var rotate_by = this.cubic(this.timer.counter, 0, 90) * Math.PI / 180;
+
                 // 1.
-                this.ctx.rotate(-this.timer.counter * Math.PI / 180);
-                this.ctx.strokeStyle = "rgba(0,0,0,0.15)";
-                this.ctx.lineWidth = 3;
+                this.ctx.rotate(-rotate_by);
+                this.ctx.strokeStyle = "rgba(0,0,0,0.2)";
+                this.ctx.lineWidth = 2;
                 draw_square(0);
                 this.ctx.strokeStyle = "rgba(0,0,0,0.8)";
                 this.ctx.lineWidth = 1;
                 draw_square(0);
 
                 // 2.
-                this.ctx.rotate(this.timer.counter * Math.PI / 180);
-                this.ctx.strokeStyle = "rgba(0,0,0,0.15)";
-                this.ctx.lineWidth = 3;
+                this.ctx.rotate(rotate_by);
+                this.ctx.strokeStyle = "rgba(0,0,0,0.2)";
+                this.ctx.lineWidth = 2;
                 draw_square(1);
                 this.ctx.strokeStyle = "rgba(0,0,0,0.8)";
                 this.ctx.lineWidth = 1;
                 draw_square(1);
 
 
-                if (this.timer.counter > 88) {
-                    this.timer.counter = 2;
+
+                if (this.timer.counter > 90) {
+                    this.timer.counter = 0;
                     this.timer.stage = this.STAGES.FIRST_SQUARE;
                 }
                 break;
-
-
-                /*
-                case this.STAGES.THIRD_SQUARE:
-
-                    // 1.
-                    this.ctx.strokeStyle = "rgba(0,0,0,0.2)";
-                    this.ctx.lineWidth = 3;
-                    draw_square(0);
-                    this.ctx.strokeStyle = "rgba(0,0,0,0.8)";
-                    this.ctx.lineWidth = 1;
-                    draw_square(0);
-
-
-                    // 2.
-                    this.ctx.rotate(this.timer.counter * Math.PI / 180);
-                    this.ctx.strokeStyle = "rgba(0,0,0,0.2)";
-                    this.ctx.lineWidth = 3;
-                    draw_square(1);
-                    this.ctx.strokeStyle = "rgba(0,0,0,0.8)";
-                    this.ctx.lineWidth = 1;
-                    draw_square(1);
-
-                    // 3.
-                    this.ctx.strokeStyle = "rgba(0,0,0,0.2)";
-                    this.ctx.lineWidth = 3;
-                    draw_square(2);
-                    this.ctx.strokeStyle = "rgba(0,0,0,0.8)";
-                    this.ctx.lineWidth = 1;
-                    draw_square(2);
-
-
-                    if (this.timer.counter > 88) {
-                        this.timer.counter = 2;
-                        this.timer.stage = this.STAGES.FIRST_SQUARE;
-                    }
-                    break;
-                    */
         }
 
         this.ctx.restore();
