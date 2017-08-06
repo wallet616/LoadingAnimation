@@ -90,18 +90,15 @@ class LoadingAnimation {
 
     resize() {
         var w = this.element.width();
-        if (w < this.size) {
+        console.log(w);
+        if (w < this.size_default) {
             this.size = w;
-            this.handle.attr("width", this.size + "px");
-            this.handle.attr("height", this.size + "px");
-            this.ctx.transform(1, 0, 0, 1, this.size / 2, this.size / 2);
+        } else {
+            this.size = this.size_default;
         }
-        /*else if (w > this.size) {
-                   this.size = this.size_default;
-                   this.handle.attr("width", this.size + "px");
-                   this.handle.attr("height", this.size + "px");
-                   this.ctx.transform(1, 0, 0, 1, this.size / 2, this.size / 2);
-               }*/
+
+        this.handle.attr("width", this.size + "px");
+        this.handle.attr("height", this.size + "px");
     }
 
 
@@ -117,7 +114,6 @@ class LoadingAnimation {
         this.handle.css("display", "block");
 
         this.ctx.save();
-        this.ctx.transform(1, 0, 0, 1, this.size / 2, this.size / 2);
 
         this.loop();
     }
@@ -132,6 +128,7 @@ class LoadingAnimation {
 
         this.ctx.save();
         this.ctx.clearRect(-this.size, -this.size, 2 * this.size, 2 * this.size);
+        this.ctx.transform(1, 0, 0, 1, this.size / 2, this.size / 2);
 
         this.ctx.beginPath();
 
