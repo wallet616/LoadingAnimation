@@ -83,6 +83,7 @@ class LoadingAnimation {
 
         this.resize();
         $(window).resize(() => this.resize());
+		this.handle.css("display", "none");
 
         this.is_initialized = true;
     }
