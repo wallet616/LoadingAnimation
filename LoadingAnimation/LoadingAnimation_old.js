@@ -1,14 +1,7 @@
 "use strict";
 
-/**
- * LoadingAnimation class.
- */
 class LoadingAnimation {
-
-    /**
-     * Constructor of the LoadingAnimation class.
-     */
-    constructor() {
+    constructor(element, options = null) {
         ////////////////////////////////////
         // Check jQuery
         if (typeof $ !== "function") {
@@ -17,15 +10,28 @@ class LoadingAnimation {
         }
 
         ////////////////////////////////////
+        // Identyficate and check element 
+        this.element = $(element);
+        if (this.element.length < 1) {
+            console.error("[LoadingAnimation] Error: No elements to add loading animation to.");
+            return;
+        }
+        if (this.element.length > 1) {
+            console.error("[LoadingAnimation] Error: Too much elements (" + this.elements.length + ") to add loading animation to.");
+            return;
+        }
+
+        ////////////////////////////////////
+        // Default values of LoadingAnimation
+        this.size_default = 50
+        this.mode = "prepend";
+
+        ////////////////////////////////////
         // Variables, do not change this by hand. As long as you dont want to chane the animation
         this.is_initialized = false;
-        this.play_animation = false;
-        this.element = undefined;
-        this.size_default = undefined;
-        this.mode = undefined;
-        this.handle = undefined;
-        this.ctx = undefined;
-        this.size = undefined;
+        this.handle = null;
+        this.ctx = null;
+        this.size = this.size_default;
 
         this.STAGES = {
             FIRST_SQUARE: 0,
@@ -43,21 +49,15 @@ class LoadingAnimation {
                 [0.0, -0.48]
             ],
             [
-                [-0.24, 0.24],
-                [0.24, 0.24],
-                [0.24, -0.24],
-                [-0.24, -0.24]
+                [-0.248, 0.248],
+                [0.248, 0.248],
+                [0.248, -0.248],
+                [-0.248, -0.248]
             ]
         ];
     }
 
 
-    /**
-     * Function to more fluent aniamtion from linear arguments.
-     * @param {number} x  - Current position.
-     * @param {number} x1 - Min pozition.
-     * @param {number} x2 - Max position.
-     */
     cubic(x, x1, x2) {
         var p1 = ((x2 - x) / (x2 - x1) * Math.PI) - (Math.PI / 2.0);
         var si = -Math.sin(p1) * (x2 - x1) + (x2 - x1);
@@ -65,53 +65,15 @@ class LoadingAnimation {
     }
 
 
-    /**
-     * Initialization of the object.
-     * @param {object} settings - Settings object.
-     * @param {object | string} settings.element - Id, class name or object itself where the animation will be added to.
-     * @param {string} settings.mode - Mode of adding animation 'prepend' or 'append'.
-     * @param {number} settings.size - Max size of the animation (canvas element).
-     */
-    init(settings) {
-        if (typeof settings === "object") {
-            if (settings.element !== null || settings.element !== undefined) {
-                this.element = $(settings.element); // It have to be only one DOM element.
-                if (this.element.length < 1) {
-                    console.error("[LoadingAnimation] Error: No elements to add loading animation to.");
-                    return;
-                }
-                if (this.element.length > 1) {
-                    console.error("[LoadingAnimation] Error: Too much elements (" + this.elements.length + ") to add loading animation to.");
-                    return;
-                }
-            } else {
-                console.error("[LoadingAnimation] Initialization Error: Settings property: 'element': Value '" + settings.element + "' is not reconisable, use element id, class or send object instead instead.");
-                return;
-            }
-        }
-
-        // Counter is an unique number for id of canvas element.
+    init() {
         if (typeof LoadingAnimation.counter === "undefined") {
             LoadingAnimation.counter = 0;
         } else
             LoadingAnimation.counter++;
 
-        // Create canvas element.
         this.handle = "<canvas class='LoadingAnimation' id='LoadingAnimation_" + LoadingAnimation.counter + "' width='50' height='50'></canvas>";
         this.handle = $(this.handle);
         this.ctx = this.handle[0].getContext("2d");
-
-        // Default value of this.mode:
-        this.mode = "prepend";
-        if (typeof settings === "object" && settings.mode !== undefined) {
-            if (settings.mode === "prepend") {
-                this.mode = "prepend";
-            } else if (settings.mode === "append") {
-                this.mode = "append";
-            } else {
-                console.error("[LoadingAnimation] Initialization Error: Settings property: 'mode': Value '" + settings.mode + "' is not reconisable, use 'prepend' or 'append' instead.");
-            }
-        }
 
         if (this.mode === "prepend") {
             this.element.prepend(this.handle);
@@ -119,37 +81,17 @@ class LoadingAnimation {
             this.element.append(this.handle);
         }
 
-        // Default value of this.size_default and this.size:
-        this.size_default = 50;
-        if (typeof settings === "object" && settings.size !== undefined) {
-            if (typeof settings.size === "number") {
-                if (settings.size > 0) {
-                    this.size_default = settings.size;
-                } else {
-                    console.error("[LoadingAnimation] Initialization Error: Settings property: 'size': Value '" + settings.size + "' is out of the range, use number in range (0, inf) instead.");
-                }
-            } else {
-                console.error("[LoadingAnimation] Initialization Error: Settings property: 'size': Value '" + settings.size + "' is not a number, use number in range (0, inf) instead.");
-            }
-
-        }
-        this.size = this.size_default;
-
-        // Handle resizing.
         this.resize();
         $(window).resize(() => this.resize());
-        this.handle.css("display", "none");
+		this.handle.css("display", "none");
 
-        // Initialization compleated.
         this.is_initialized = true;
     }
 
 
-    /**
-     * Resize the canvas element (animation). Adjusting it to current parent size and saved in config size.
-     */
     resize() {
         var w = this.element.width();
+        console.log(w);
         if (w < this.size_default) {
             this.size = w;
         } else {
@@ -161,9 +103,6 @@ class LoadingAnimation {
     }
 
 
-    /**
-     * Starts (and show) the animation.
-     */
     start() {
         if (this.play_animation === true) {
             return;
@@ -181,9 +120,6 @@ class LoadingAnimation {
     }
 
 
-    /**
-     * Animation loop.
-     */
     loop() {
         if (this.play_animation !== true) {
             return;
@@ -277,9 +213,6 @@ class LoadingAnimation {
     }
 
 
-    /**
-     * Allows to stop animation play (including backgroud calculations). Also hides the animation object.
-     */
     stop() {
         this.ctx.restore();
         this.play_animation = false;
@@ -287,9 +220,6 @@ class LoadingAnimation {
     }
 
 
-    /**
-     * Allows to completly remove the animation object (including backgroud calculations).
-     */
     remove() {
         this.is_initialized = false;
         $(window).off("resize", this.resize);

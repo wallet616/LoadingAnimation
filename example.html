@@ -31,7 +31,7 @@
         <div class="row">
             <div class="col-xs-12">
                 <h1>Example 1</h1>
-                <h3>By the selector</h3>
+                <h3>With default-minimal configuration</h3>
             </div>
         </div>
         <div class="row">
@@ -40,8 +40,10 @@
             </div>
         </div>
         <script>
-            var example_1 = new LoadingAnimation("#example_1");
-            example_1.init();
+            var example_1 = new LoadingAnimation();
+            example_1.init({
+                element: "#example_1"
+            });
 
             example_1.start();
         </script>
@@ -49,6 +51,30 @@
 
 
 
+
+        <!-- Example 2 -->
+        <div class="row">
+            <div class="col-xs-12">
+                <h1>Example 2</h1>
+                <h3>With customising all settings</h3>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-12" id="example_2">
+
+            </div>
+        </div>
+        <script>
+            var example_2 = new LoadingAnimation();
+            example_2.init({
+                element: "#example_2",
+                mode: "prepend",
+                size: 100
+            });
+
+            example_2.start();
+        </script>
+        <!-- End of: Example 2 -->
 
 
 
