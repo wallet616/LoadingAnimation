@@ -1,4 +1,4 @@
-# TextAnimation
+# LoadingAnimation
 
 A JavaScript library that allows you to add fancy looking loading animation to any html element.
 
